@@ -1,25 +1,63 @@
 cmake_minimum_required(VERSION 3.25.2)
 
-project(lodepng)
+project(lodepng VERSION 1.0.0 LANGUAGES CXX)
 
-# 1) Build a real shared library (DLL + .lib)
-add_library(${PROJECT_NAME} SHARED
+include(GNUInstallDirs)
+include(CMakePackageConfigHelpers)
+
+add_library(lodepng SHARED
     lodepng.cpp
 )
 
-# 2) Export *all* public symbols automatically (no __declspec needed)
-#    (alternative: write your own DLLEXPORT/DLLIMPORT macros)
-set_target_properties(${PROJECT_NAME}
-    PROPERTIES
-      WINDOWS_EXPORT_ALL_SYMBOLS ON
-      # (optional) where the .lib ends up
-    #   ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
-    #   RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
+set_target_properties(lodepng PROPERTIES
+    WINDOWS_EXPORT_ALL_SYMBOLS ON
 )
 
-# 3) Include headers for consumers
-target_include_directories(${PROJECT_NAME}
+target_include_directories(lodepng
     PUBLIC
-      $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
-      $<INSTALL_INTERFACE:include>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+        $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+)
+
+add_library(lodepng::lodepng ALIAS lodepng)
+
+install(
+    TARGETS lodepng
+    EXPORT lodepngTargets
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+    INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+)
+
+install(
+    FILES
+        ${CMAKE_CURRENT_SOURCE_DIR}/lodepng.h
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+)
+
+install(
+    EXPORT lodepngTargets
+    FILE lodepngTargets.cmake
+    NAMESPACE lodepng::
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/lodepng
+)
+
+configure_package_config_file(
+    ${CMAKE_CURRENT_SOURCE_DIR}/cmake/lodepngConfig.cmake.in
+    ${CMAKE_CURRENT_BINARY_DIR}/lodepngConfig.cmake
+    INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/lodepng
+)
+
+write_basic_package_version_file(
+    ${CMAKE_CURRENT_BINARY_DIR}/lodepngConfigVersion.cmake
+    VERSION ${PROJECT_VERSION}
+    COMPATIBILITY SameMajorVersion
+)
+
+install(
+    FILES
+        ${CMAKE_CURRENT_BINARY_DIR}/lodepngConfig.cmake
+        ${CMAKE_CURRENT_BINARY_DIR}/lodepngConfigVersion.cmake
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/lodepng
 )
