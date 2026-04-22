@@ -34,7 +34,7 @@
           description = "CMake-packaged fork of lodepng";
           homepage = "https://github.com/PatJRobinson/lodepng";
           license = licenses.zlib;
-          platforms = platforms.linux;
+          platforms = platforms.linux ++ platforms.darwin;
         };
       };
 
